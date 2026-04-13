@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shubh Business</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0c0c0c;--surface:#141414;--card:#1a1a1a;--card2:#1f1f1f;
+  --border:#272727;--border2:#333;
+  --gold:#e8b84b;--gold-dim:#a07820;--gold-faint:#e8b84b14;
+  --text:#e8e8e0;--muted:#777;--faint:#3a3a3a;
+  --green:#52b788;--red:#e07070;--orange:#e09050;--blue:#5b9bd5;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6;}
+
+nav{position:fixed;top:0;left:0;right:0;height:56px;padding:0 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(12,12,12,0.97);border-bottom:1px solid var(--border);z-index:300;}
+.nav-logo{font-size:.88rem;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.78rem;transition:color .2s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-time{font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+/* HERO */
+.hero{min-height:100vh;padding:6rem 2rem 4rem;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  background:radial-gradient(ellipse 80% 55% at 50% 40%,#1c1400 0%,var(--bg) 68%);}
+.eyebrow{font-size:.65rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);
+  margin-bottom:1.8rem;display:flex;align-items:center;gap:12px;}
+.eyebrow::before,.eyebrow::after{content:'';width:36px;height:1px;background:var(--gold-dim);}
+.hero h1{font-size:clamp(2.4rem,7vw,5rem);font-weight:800;line-height:1.05;color:#fff;margin-bottom:1.1rem;}
+.hero h1 em{color:var(--gold);font-style:normal;}
+.hero-sub{font-size:.9rem;color:var(--muted);max-width:440px;margin-bottom:2.5rem;}
+.cta{display:inline-block;padding:12px 30px;background:var(--gold);color:#000;
+  font-weight:700;font-size:.85rem;border-radius:4px;text-decoration:none;transition:opacity .2s,transform .15s;}
+.cta:hover{opacity:.85;transform:translateY(-2px);}
+.hero-stats{display:flex;gap:3rem;margin-top:4rem;flex-wrap:wrap;justify-content:center;}
+.hs .n{font-size:1.5rem;font-weight:700;color:var(--gold);}
+.hs .l{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+/* NIFTY BAR */
+.nifty-bar{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:.5rem 2rem;display:flex;gap:2rem;overflow-x:auto;align-items:center;flex-wrap:nowrap;}
+.ni-item{display:flex;align-items:center;gap:8px;white-space:nowrap;font-size:.72rem;}
+.ni-name{color:var(--muted);}
+.ni-val{font-weight:600;color:#fff;font-variant-numeric:tabular-nums;}
+.ni-chg{font-size:.68rem;font-variant-numeric:tabular-nums;}
+
+section{padding:4.5rem 1.5rem;}
+.container{max-width:1160px;margin:0 auto;}
+.sec-head{text-align:center;margin-bottom:2.8rem;}
+.sec-label{display:inline-block;font-size:.6rem;letter-spacing:3px;text-transform:uppercase;
+  color:var(--gold);border:1px solid var(--gold-dim);background:var(--gold-faint);
+  padding:4px 13px;border-radius:20px;margin-bottom:.9rem;}
+.sec-head h2{font-size:1.75rem;font-weight:700;color:#fff;margin-bottom:.35rem;}
+.sec-head p{font-size:.83rem;color:var(--muted);}
+
+/* RADAR */
+#radar{background:var(--surface);}
+.top-bar{display:flex;align-items:center;justify-content:space-between;
+  background:var(--card);border:1px solid var(--border);border-radius:7px;
+  padding:.65rem 1.1rem;margin-bottom:1.3rem;flex-wrap:wrap;gap:.5rem;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+  display:inline-block;margin-right:5px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.top-bar span{font-size:.72rem;color:var(--muted);}
+.icon-btn{background:none;border:1px solid var(--border);color:var(--muted);
+  padding:5px 13px;border-radius:4px;font-size:.7rem;cursor:pointer;transition:all .2s;}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold);}
+.disc{font-size:.7rem;color:var(--orange);background:#1a1000;border:1px solid #3a2500;
+  border-radius:6px;padding:.55rem 1rem;margin-bottom:1.6rem;text-align:center;}
+
+.stocks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:1.3rem;}
+
+.stock-card{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;cursor:pointer;transition:border-color .25s,transform .2s;}
+.stock-card:hover{border-color:#4a3a18;transform:translateY(-3px);}
+.card-top{padding:1.1rem 1.1rem .85rem;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:flex-start;}
+.sname{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:2px;}
+.sticker{font-size:.63rem;color:var(--gold);}
+.ssector{font-size:.67rem;color:var(--muted);margin-top:3px;}
+.cmp-wrap{text-align:right;min-width:110px;}
+.cmp-price{font-size:1.35rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;}
+.cmp-chg{font-size:.67rem;margin-top:2px;font-variant-numeric:tabular-nums;}
+.up{color:var(--green)}.down{color:var(--red)}.flat{color:var(--muted)}
+.card-body{padding:.9rem 1.1rem;}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:.75rem;}
+.mb{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 8px;}
+.ml{font-size:.55rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:2px;}
+.mv{font-size:.8rem;font-weight:600;}
+.g{color:var(--green)}.w{color:var(--orange)}.b{color:var(--red)}.n{color:var(--text)}
+.tap-hint{font-size:.65rem;color:var(--faint);text-align:center;padding:.5rem 0 0;
+  border-top:1px solid var(--border);margin-top:.4rem;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;
+  display:none;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:12px;
+  width:100%;max-width:880px;margin:auto;}
+.modal-head{padding:1.2rem 1.4rem;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(120deg,#1a1400 0%,var(--surface) 100%);}
+.modal-title{font-size:1.05rem;font-weight:700;color:#fff;}
+.modal-sub{font-size:.68rem;color:var(--gold);margin-top:2px;}
+.modal-price-wrap{text-align:right;}
+.modal-price{font-size:1.3rem;font-weight:700;color:#fff;}
+.modal-chg{font-size:.68rem;margin-top:1px;}
+.modal-close{background:none;border:1px solid var(--border);color:var(--muted);
+  width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.95rem;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;margin-left:1rem;}
+.modal-close:hover{border-color:var(--red);color:var(--red);}
+.modal-body{padding:1.3rem 1.4rem;}
+.modal-tabs{display:flex;gap:4px;margin-bottom:1.3rem;flex-wrap:wrap;}
+.mtab{background:none;border:1px solid var(--border);color:var(--muted);
+  padding:6px 13px;border-radius:5px;font-size:.7rem;cursor:pointer;transition:all .2s;}
+.mtab.active{background:var(--gold-faint);border-color:var(--gold-dim);color:var(--gold);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:.9rem;margin-bottom:.9rem;}
+.chart-wrap canvas{max-height:200px;}
+.chart-title{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:.6rem;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+
+.peer-table{width:100%;border-collapse:collapse;font-size:.72rem;}
+.peer-table th{text-align:left;color:var(--muted);font-weight:400;font-size:.6rem;
+  text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;border-bottom:1px solid var(--border);}
+.peer-table td{padding:7px 8px;border-bottom:1px solid var(--border);}
+.peer-table tr.hl td{color:var(--gold);}
+
+.info-box{background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:.9rem 1rem;margin-bottom:.8rem;}
+.info-box h4{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:.45rem;}
+.info-box p{font-size:.76rem;color:#bbb;line-height:1.65;}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:.4rem;}
+.tag{font-size:.63rem;padding:2px 8px;border-radius:20px;border:1px solid;}
+.tag.moat{background:#0d2018;border-color:#1e5535;color:#7dcfa0;}
+.tag.weak{background:#200d0d;border-color:#551e1e;color:#d98080;}
+.tag.risk{background:#1a1000;border-color:#4a3000;color:#c8951a;}
+
+.donut-wrap{display:flex;align-items:center;gap:1.2rem;}
+.donut-wrap canvas{max-width:150px;max-height:150px;flex-shrink:0;}
+.dl-item{display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:.72rem;}
+.dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+.quote-card{background:var(--card);border-left:3px solid var(--gold);
+  border-radius:0 8px 8px 0;padding:.8rem .95rem;margin-bottom:.7rem;}
+.quote-text{font-size:.76rem;color:#ccc;line-height:1.65;font-style:italic;margin-bottom:.35rem;}
+.quote-attr{font-size:.62rem;color:var(--gold);}
+
+.war-box{background:#130e00;border:1px solid #3d2c00;border-radius:6px;padding:.65rem .85rem;}
+.war-box p{font-size:.74rem;color:#c8951a;line-height:1.6;}
+
+.ob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-top:.6rem;}
+.ob-box{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:.65rem .85rem;text-align:center;}
+.ob-yr{font-size:.6rem;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
+.ob-val{font-size:.95rem;font-weight:700;color:var(--gold);}
+.ob-sub{font-size:.6rem;color:var(--muted);margin-top:2px;}
+
+/* NEWS SECTION */
+#news{background:var(--bg);}
+.news-controls{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.4rem;flex-wrap:wrap;gap:.8rem;}
+.source-tabs{display:flex;gap:5px;flex-wrap:wrap;}
+.stab{background:none;border:1px solid var(--border);color:var(--muted);
+  padding:6px 14px;border-radius:20px;font-size:.7rem;cursor:pointer;transition:all .2s;}
+.stab.active{background:var(--gold-faint);border-color:var(--gold-dim);color:var(--gold);}
+.news-refresh{display:flex;align-items:center;gap:.5rem;}
+.refresh-big{background:none;border:1px solid var(--border);color:var(--muted);
+  padding:7px 18px;border-radius:5px;font-size:.72rem;cursor:pointer;
+  display:flex;align-items:center;gap:6px;transition:all .2s;}
+.refresh-big:hover{border-color:var(--gold);color:var(--gold);}
+.refresh-big .spin{display:inline-block;transition:transform .3s;}
+.refresh-big.loading .spin{animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.news-time{font-size:.65rem;color:var(--muted);}
+
+.news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem;}
+
+.news-card{background:var(--card);border:1px solid var(--border);border-radius:9px;
+  padding:1rem 1.1rem;transition:border-color .2s,transform .15s;text-decoration:none;display:block;}
+.news-card:hover{border-color:#3a3020;transform:translateY(-2px);}
+.nc-source{font-size:.6rem;text-transform:uppercase;letter-spacing:1px;
+  color:var(--gold);margin-bottom:.4rem;display:flex;align-items:center;gap:6px;}
+.nc-dot{width:5px;height:5px;border-radius:50%;}
+.nc-title{font-size:.82rem;font-weight:600;color:#ddd;line-height:1.5;margin-bottom:.5rem;}
+.nc-desc{font-size:.72rem;color:var(--muted);line-height:1.55;margin-bottom:.6rem;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.nc-time{font-size:.62rem;color:var(--faint);}
+
+.news-loading{text-align:center;padding:3rem;color:var(--muted);font-size:.85rem;}
+.news-error{text-align:center;padding:2rem;color:var(--red);font-size:.8rem;}
+.news-empty{text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;}
+
+footer{background:#060606;border-top:1px solid var(--border);
+  padding:1.8rem;text-align:center;font-size:.75rem;color:var(--muted);}
+footer strong{color:var(--gold);}
+
+@media(max-width:640px){
+  .nav-links{display:none;}
+  .metrics{grid-template-columns:repeat(2,1fr);}
+  .stocks-grid,.news-grid{grid-template-columns:1fr;}
+  .two-col{grid-template-columns:1fr;}
+  .ob-grid{grid-template-columns:repeat(2,1fr);}
+  .nifty-bar{gap:1.2rem;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Shubh Business</div>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#radar">Radar</a></li>
+    <li><a href="#news">Daily News</a></li>
+  </ul>
+  <div class="nav-time" id="navtime">--:--</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="eyebrow">Personal Investment Research</div>
+  <h1>Welcome to<br><em>Shubh Business</em></h1>
+  <p class="hero-sub">Tracking the stocks I believe in. Research-first, conviction-driven — not hype.</p>
+  <a href="#radar" class="cta">Open The Radar</a>
+  <div class="hero-stats">
+    <div class="hs"><div class="n">7</div><div class="l">Stocks Tracked</div></div>
+    <div class="hs"><div class="n">NSE</div><div class="l">Exchange</div></div>
+    <div class="hs"><div class="n">Live</div><div class="l">Prices</div></div>
+    <div class="hs"><div class="n">Daily</div><div class="l">News Feed</div></div>
+  </div>
+</section>
+
+<!-- NIFTY BAR -->
+<div class="nifty-bar" id="nifty-bar">
+  <div class="ni-item"><span class="ni-name">NIFTY 50</span><span class="ni-val" id="ni-nifty">--</span><span class="ni-chg flat" id="nc-nifty">--</span></div>
+  <div class="ni-item"><span class="ni-name">SENSEX</span><span class="ni-val" id="ni-sensex">--</span><span class="ni-chg flat" id="nc-sensex">--</span></div>
+  <div class="ni-item"><span class="ni-name">BANK NIFTY</span><span class="ni-val" id="ni-banknifty">--</span><span class="ni-chg flat" id="nc-banknifty">--</span></div>
+  <div class="ni-item"><span class="ni-name">GOLD (MCX)</span><span class="ni-val" id="ni-gold">--</span><span class="ni-chg flat" id="nc-gold">--</span></div>
+  <div class="ni-item"><span class="ni-name">USD/INR</span><span class="ni-val" id="ni-usdinr">--</span><span class="ni-chg flat" id="nc-usdinr">--</span></div>
+</div>
+
+<!-- RADAR -->
+<section id="radar">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label">Watchlist</div>
+      <h2>The Radar</h2>
+      <p>Tap any card for deep dive — charts, peer comparison, expert views, order book & more</p>
+    </div>
+    <div class="top-bar">
+      <div><span class="live-dot"></span><span id="pstatus">Fetching live prices...</span></div>
+      <button class="icon-btn" onclick="fetchAll()">↻ Refresh Prices</button>
+    </div>
+    <div class="disc">Personal research tracker — not financial advice. Prices via Yahoo Finance, may be delayed ~15 min during market hours.</div>
+    <div class="stocks-grid" id="stocks-grid"></div>
+  </div>
+</section>
+
+<!-- DAILY NEWS -->
+<section id="news">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-label">Daily Digest</div>
+      <h2>Daily News</h2>
+      <p>Live financial & economic news from Economic Times, Business Standard, MoneyControl & more</p>
+    </div>
+    <div class="news-controls">
+      <div class="source-tabs" id="source-tabs">
+        <button class="stab active" onclick="switchSource('all',this)">All Sources</button>
+        <button class="stab" onclick="switchSource('et',this)">Economic Times</button>
+        <button class="stab" onclick="switchSource('bs',this)">Business Standard</button>
+        <button class="stab" onclick="switchSource('mc',this)">MoneyControl</button>
+        <button class="stab" onclick="switchSource('fi',this)">Financial Express</button>
+      </div>
+      <div class="news-refresh">
+        <span class="news-time" id="news-time">Not loaded yet</span>
+        <button class="refresh-big" id="news-refresh-btn" onclick="loadNews(currentSource)">
+          <span class="spin">↻</span> Refresh News
+        </button>
+      </div>
+    </div>
+    <div id="news-container"><div class="news-loading">Tap "Refresh News" to load latest headlines</div></div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 <strong>Shubh Business</strong> — Personal Investment Research</p>
+  <p style="margin-top:5px;font-size:.67rem;">Not financial advice. Prices via Yahoo Finance (delayed ~15 min). News via public RSS feeds. Always do your own research.</p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modal-title">--</div>
+        <div class="modal-sub" id="modal-sub">--</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.8rem">
+        <div class="modal-price-wrap">
+          <div class="modal-price" id="modal-price">--</div>
+          <div class="modal-chg flat" id="modal-chg">--</div>
+        </div>
+        <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs" id="modal-tabs"></div>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ────────────────────────────────────────────────
+// STOCK DATA
+// ────────────────────────────────────────────────
+const STOCKS=[
+{key:'FINCABLES',sym:'FINCABLES.NS',name:'Finolex Wires & Cables',sector:'Electrical / Infrastructure',
+ what:`Finolex Cables is one of India's largest wire & cable manufacturers with 50+ years of history. Makes electrical wires, power cables, communication cables, copper rods, and has expanded into FMEG (fans, switches, lighting). Strong pan-India dealer network with high brand recall in retail and institutional segments. Debt-free company with consistent dividend payouts.`,
+ metrics:{ROE:'13%',PE:'~19x',Debt:'Zero',ROCE:'~16%','Div Yield':'~1.5%',Promoter:'~35%','P/B':'~2.5x','Mkt Cap':'~₹12K Cr'},
+ revenue:[4710,5014,5319,5750],pat:[510,651,701,750],capex:[180,220,260,290],years:['FY22','FY23','FY24','FY25E'],
+ peers:[
+   {n:'Finolex',roe:'13%',de:'0.00',sg:'6%',pm:'13%',pe:'19x',hl:true},
+   {n:'Polycab',roe:'22%',de:'0.05',sg:'22%',pm:'10%',pe:'38x'},
+   {n:'KEI Inds',roe:'20%',de:'0.10',sg:'20%',pm:'8%',pe:'42x'},
+   {n:'Havells',roe:'24%',de:'0.00',sg:'14%',pm:'9%',pe:'55x'},
+ ],
+ mktshare:[{l:'Electrical Cables',p:62,c:'#e8b84b'},{l:'Comm Cables',p:20,c:'#52b788'},{l:'Copper Rods',p:13,c:'#5b9bd5'},{l:'FMEG/Others',p:5,c:'#777'}],
+ orderbook:[{yr:'FY23',v:'₹5,014 Cr',n:'Revenue'},{yr:'FY24',v:'₹5,319 Cr',n:'Revenue'},{yr:'FY25E',v:'₹5,750 Cr',n:'Estimate'}],
+ moat:['50+ Yr Brand','Zero Debt','Pan-India Distribution','Copper Rod Integration'],
+ weak:['Low Promoter %','Promoter Conflict History','Low ROE vs Peers','FMEG Slow Scale'],
+ war:'Copper prices spike during war tensions — raises input costs and squeezes margins short-term. However domestic infra and real estate demand remains structural. Relatively resilient vs export-heavy peers.',
+ quotes:[
+   {t:'Jefferies reiterated Buy on Finolex Cables with target ₹1,235 — calling it a key beneficiary of India\'s housing and construction growth story.',a:'Jefferies Research, 2025'},
+   {t:'Finolex is a debt-free cash machine but governance overhang from promoter family dispute has capped rerating. Resolution could be a huge re-rating catalyst.',a:'Motilal Oswal Research'},
+ ]
+},
+{key:'KERNEX',sym:'KERNEX.NS',name:'Kernex Microsystems',sector:'Defence / Railway Safety',
+ what:`Kernex Microsystems is a Hyderabad-based defence and railway safety tech company. It is a key player in India's Kavach anti-collision system — one of the world's largest railway safety programs. Also makes embedded systems and simulators for defence. Very small company with a potentially massive addressable market if Kavach rolls out on timeline.`,
+ metrics:{ROE:'~18%',PE:'Very High',Debt:'Low',ROCE:'~20%','Order Book':'Growing',Promoter:'~46%','Risk Level':'High','Mkt Cap':'~₹900 Cr'},
+ revenue:[38,52,95,180],pat:[5,9,22,45],capex:[8,12,18,25],years:['FY22','FY23','FY24','FY25E'],
+ peers:[
+   {n:'Kernex',roe:'18%',de:'0.05',sg:'83%',pm:'23%',pe:'High',hl:true},
+   {n:'HBL Power',roe:'15%',de:'0.10',sg:'25%',pm:'8%',pe:'35x'},
+   {n:'BEML',roe:'12%',de:'0.20',sg:'20%',pm:'7%',pe:'40x'},
+   {n:'Texmaco Rail',roe:'10%',de:'0.40',sg:'18%',pm:'5%',pe:'30x'},
+ ],
+ mktshare:[{l:'Kavach/Railway',p:70,c:'#e8b84b'},{l:'Defence Tech',p:20,c:'#52b788'},{l:'Others',p:10,c:'#777'}],
+ orderbook:[{yr:'FY23',v:'₹52 Cr',n:'Revenue'},{yr:'FY24',v:'₹95 Cr',n:'Kavach Ramp'},{yr:'Pipeline',v:'₹800+ Cr',n:'Kavach Pipeline'}],
+ moat:['Kavach System IP','First Mover Railway Safety','Govt Relationship','Niche Technology'],
+ weak:['Very Small Cap','Order Delays Risk','Lumpy Revenue','Execution Uncertainty','Low Liquidity'],
+ war:'War tensions are a tailwind — India raises railway safety and defence spending. Kavach gets government priority. India-Pak tensions could accelerate procurement cycles significantly for railway safety tech.',
+ quotes:[
+   {t:'Kavach has a massive addressable market of 35,000+ route kilometres. Companies involved could see order books multiply 8-10x if execution picks up pace.',a:'Railway Technology Analyst, 2024'},
+   {t:'Kernex is a high-risk, high-reward bet on Indian Railways safety. Position sizing is critical — this is not a large-cap.',a:'Smallcase Research, 2025'},
+ ]
+},
+{key:'ADANIGREEN',sym:'ADANIGREEN.NS',name:'Adani Green Energy',sector:'Renewable Energy',
+ what:`Adani Green Energy is India's largest renewable energy company by operational capacity. Develops, builds and operates solar and wind energy plants, selling power via long-term Power Purchase Agreements (PPAs) with government utilities. Targeting 50 GW capacity by 2030 from ~11 GW operational today. Part of the Adani Group conglomerate.`,
+ metrics:{ROE:'~21%',PE:'Very High',Debt:'Very High','D/E':'~8.5x',Revenue:'₹12,499 Cr',Profit:'₹1,856 Cr',Capacity:'11 GW','Mkt Cap':'~₹1.8L Cr'},
+ revenue:[6937,9004,12499,15200],pat:[1018,1259,1856,2400],capex:[18000,22000,28000,35000],years:['FY22','FY23','FY24','FY25E'],
+ peers:[
+   {n:'Adani Green',roe:'21%',de:'8.5',sg:'39%',pm:'15%',pe:'96x',hl:true},
+   {n:'Torrent Power',roe:'18%',de:'1.2',sg:'22%',pm:'12%',pe:'28x'},
+   {n:'JSW Energy',roe:'12%',de:'1.5',sg:'18%',pm:'11%',pe:'35x'},
+   {n:'CESC',roe:'10%',de:'0.8',sg:'12%',pm:'8%',pe:'22x'},
+ ],
+ mktshare:[{l:'Solar',p:72,c:'#e8b84b'},{l:'Wind',p:18,c:'#52b788'},{l:'Hybrid',p:10,c:'#5b9bd5'}],
+ orderbook:[{yr:'FY23 Cap',v:'9.4 GW',n:'Operational'},{yr:'FY24 Cap',v:'10.9 GW',n:'Operational'},{yr:'2030 Target',v:'50 GW',n:'Pipeline'}],
+ moat:['Largest Renewable India','Massive Land Bank','Long-term PPAs','Govt Alignment','Scale Advantage'],
+ weak:['Massive Debt (D/E 8.5x)','Governance Risk','Hindenburg Legacy','Rate Sensitive','Stretched Valuation'],
+ war:'Oil price spikes from war accelerate renewable adoption — sector tailwind. But Adani\'s massive debt is highly sensitive to rising interest rates that wars often trigger. Mixed impact — green push helps but debt risk rises with rates.',
+ quotes:[
+   {t:'Adani Green is a bet on India\'s energy transition. The asset base is world-class. The risk is the leverage — if rates rise sharply, refinancing could get painful.',a:'Macquarie Research, 2025'},
+   {t:'The 50 GW target by 2030 is ambitious but execution track record is there. This is a story stock — you are paying for tomorrow\'s capacity today.',a:'Morgan Stanley India, 2024'},
+ ]
+},
+{key:'BSE',sym:'BSE.NS',name:'BSE Limited',sector:'Capital Markets / Exchange',
+ what:`BSE (Bombay Stock Exchange) is Asia's oldest stock exchange founded in 1875. Runs the exchange platform, StAR MF platform (India's largest MF transaction platform processing ₹20,000+ Cr monthly), SME exchange, and is growing in derivatives. Duopoly with NSE makes it one of India's most protected businesses. Revenue is tied to market volumes, listing fees and platform transactions.`,
+ metrics:{ROE:'~25%',PE:'~50x',Debt:'Negligible',ROCE:'~28%','Div Yield':'~0.5%',Promoter:'Public Co','Revenue FY24':'₹1,180 Cr','Mkt Cap':'~₹60K Cr'},
+ revenue:[510,780,1180,1600],pat:[250,410,620,900],capex:[40,55,70,90],years:['FY22','FY23','FY24','FY25E'],
+ peers:[
+   {n:'BSE',roe:'25%',de:'0.00',sg:'52%',pm:'52%',pe:'50x',hl:true},
+   {n:'CDSL',roe:'30%',de:'0.00',sg:'35%',pm:'46%',pe:'55x'},
+   {n:'MCX',roe:'18%',de:'0.00',sg:'20%',pm:'30%',pe:'45x'},
+   {n:'NSE',roe:'N/A',de:'N/A',sg:'N/A',pm:'N/A',pe:'Unlisted'},
+ ],
+ mktshare:[{l:'StAR MF Platform',p:48,c:'#e8b84b'},{l:'Equity Listing Fees',p:25,c:'#52b788'},{l:'Derivatives',p:18,c:'#5b9bd5'},{l:'Others',p:9,c:'#777'}],
+ orderbook:[{yr:'FY23',v:'₹780 Cr',n:'Revenue'},{yr:'FY24',v:'₹1,180 Cr',n:'Revenue'},{yr:'FY25E',v:'₹1,600 Cr',n:'Estimate'}],
+ moat:['Duopoly Exchange','StAR MF #1 India','Network Effect','150+ Yr Brand','Regulatory Moat'],
+ weak:['NSE Dominates F&O','SEBI Regulatory Risk','Market-Dependent Revenue','No Promoter Anchor'],
+ war:'Market crashes from war tensions reduce trading volumes directly — hits revenue hard. FII outflows hurt sentiment. High sensitivity to geopolitical shocks but historically recovers fast once tensions ease.',
+ quotes:[
+   {t:'BSE\'s StAR MF platform is a hidden gem — it processes a massive chunk of India\'s MF transactions. This platform alone could justify the entire valuation.',a:'Nuvama Research, 2025'},
+   {t:'BSE is a structural beneficiary of India\'s financialization. Every new SIP investor adds to platform revenue permanently.',a:'ICICI Securities, 2024'},
+ ]
+},
+{key:'CDSL',sym:'CDSL.NS',name:'CDSL',sector:'Capital Markets / Depository',
+ what:`Central Depository Services Limited is one of two depositories in India (alongside NSDL). Every stock investor in India must have an account with CDSL or NSDL. Holds securities in electronic form and earns from annual maintenance charges, transaction fees, KYC services and data analytics. Benefits directly from every new demat account — currently at 130M+ and growing.`,
+ metrics:{ROE:'~30%',PE:'~55x',Debt:'Zero',ROCE:'~35%','Div Yield':'~0.6%','Demat A/Cs':'130M+','Revenue FY24':'₹820 Cr','Mkt Cap':'~₹30K Cr'},
+ revenue:[400,600,820,1100],pat:[170,290,380,510],capex:[25,35,45,60],years:['FY22','FY23','FY24','FY25E'],
+ peers:[
+   {n:'CDSL',roe:'30%',de:'0.00',sg:'37%',pm:'46%',pe:'55x',hl:true},
+   {n:'BSE',roe:'25%',de:'0.00',sg:'52%',pm:'52%',pe:'50x'},
+   {n:'KFin Tech',roe:'22%',de:'0.10',sg:'30%',pm:'28%',pe:'48x'},
+   {n:'CAMS',roe:'28%',de:'0.00',sg:'25%',pm:'32%',pe:'52x'},
+ ],
+ mktshare:[{l:'Annual Maint. Charges',p:42,c:'#e8b84b'},{l:'Transaction Fees',p:30,c:'#52b788'},{l:'KYC Services',p:18,c:'#5b9bd5'},{l:'Data & Others',p:10,c:'#777'}],
+ orderbook:[{yr:'FY23',v:'₹600 Cr',n:'Revenue'},{yr:'FY24',v:'₹820 Cr',n:'Revenue'},{yr:'FY25E',v:'₹1,100 Cr',n:'Estimate'}],
+ moat:['Duopoly Depository','Zero Debt','Recurring Revenue','30%+ ROE','130M+ Accounts'],
+ weak:['Rich Valuation','SEBI Regulatory Risk','Market Sentiment Linked','Growth Could Slow'],
+ war:'New demat account openings slow sharply during market panic. But existing 130M accounts still pay annual fees — giving a strong revenue floor. Less volatile than brokers but still correlated to market sentiment.',
+ quotes:[
+   {t:'CDSL is one of the purest plays on India\'s financialization. Every Indian who enters the stock market is a lifetime CDSL customer. The moat is essentially unbreakable.',a:'Motilal Oswal, 2025'},
+   {t:'At 55x PE, CDSL looks expensive but the recurring revenue model and near-zero churn justify a premium. We see 20%+ earnings CAGR for 5 years ahead.',a:'Kotak Securities, 2024'},
+ ]
+},
+{key:'NTPC',sym:'NTPC.NS',name:'NTPC Limited',sector:'Power / PSU',
+ what:`NTPC is India's largest power generation company and a Navratna PSU (Govt of India owns 51%). Generates and sells electricity to state distribution companies. Operates 70+ GW — mostly thermal (coal) but rapidly adding renewable energy. Has a regulated return model where earnings are largely predictable. NTPC Green Energy was separately listed in late 2024.`,
+ metrics:{ROE:'~12%',PE:'~16x',Debt:'Moderate',ROCE:'~9%','Div Yield':'~2.5%',Promoter:'51% Govt',Capacity:'73 GW','Mkt Cap':'~₹3.2L Cr'},
+ revenue:[131424,160571,187723,215000],pat:[14142,16269,21332,24000],capex:[28000,32000,38000,45000],years:['FY22','FY23','FY24','FY25E'],
+ peers:[
+   {n:'NTPC',roe:'12%',de:'1.8',sg:'17%',pm:'11%',pe:'16x',hl:true},
+   {n:'Power Grid',roe:'23%',de:'2.0',sg:'10%',pm:'33%',pe:'18x'},
+   {n:'Torrent Power',roe:'18%',de:'1.2',sg:'22%',pm:'12%',pe:'28x'},
+   {n:'Tata Power',roe:'13%',de:'1.5',sg:'15%',pm:'7%',pe:'32x'},
+ ],
+ mktshare:[{l:'Coal/Thermal',p:72,c:'#e09050'},{l:'Hydro',p:8,c:'#5b9bd5'},{l:'Solar/Wind',p:12,c:'#52b788'},{l:'Gas',p:8,c:'#777'}],
+ orderbook:[{yr:'FY23 Rev',v:'₹1.6L Cr',n:'Revenue'},{yr:'FY24 Rev',v:'₹1.87L Cr',n:'Revenue'},{yr:'2032 Target',v:'60 GW',n:'Renewable Cap'}],
+ moat:['51% Govt Ownership','Regulated Return Model','73 GW Scale','Essential Service','Strong Dividend History'],
+ weak:['PSU Bureaucracy','Coal/Fossil Dependency','Slow EPS Growth','High Debt','Govt Policy Risk'],
+ war:'Coal import prices rise with war. But NTPC operates under cost-plus regulated tariffs so most fuel cost increase gets passed through to consumers. Government backing and essential service status make it a safe haven during volatile periods.',
+ quotes:[
+   {t:'NTPC is a must-own in any India power portfolio. The dividend yield provides a floor, the renewable transition provides the upside. A solid compounder at current valuations.',a:'Goldman Sachs India, 2025'},
+   {t:'NTPC\'s regulated return model means you\'re essentially buying a government-backed annuity with an energy transition kicker. Not exciting but very reliable.',a:'HDFC Securities Research'},
+ ]
+},
+{key:'ZENTEC',sym:'ZENTEC.NS',name:'Zen Technologies',sector:'Defence / Combat Simulation',
+ what:`Zen Technologies is India's leading manufacturer of defence training simulators and counter-drone systems. Provides combat training solutions to Indian Army, Navy, Air Force, paramilitary and police forces. Products include tank simulators, anti-tank missile trainers, artillery simulators, anti-drone systems and VR training platforms. 1,000+ systems shipped globally. Order book crossed ₹1,400 Cr. 200+ patents. Pure-play Atmanirbhar Bharat defence stock.`,
+ metrics:{ROE:'~24%',PE:'~48x',Debt:'Minimal',ROCE:'~28%','Order Book':'₹1,400+ Cr',Promoter:'~55%','PAT Margin':'~42%','Mkt Cap':'~₹13K Cr'},
+ revenue:[100,185,360,835],pat:[22,52,130,350],capex:[15,22,35,55],years:['FY22','FY23','FY24','FY25E'],
+ peers:[
+   {n:'Zen Tech',roe:'24%',de:'0.02',sg:'127%',pm:'42%',pe:'48x',hl:true},
+   {n:'Data Patterns',roe:'18%',de:'0.00',sg:'35%',pm:'25%',pe:'52x'},
+   {n:'Bharat Elect.',roe:'24%',de:'0.00',sg:'30%',pm:'20%',pe:'45x'},
+   {n:'Astra Micro',roe:'16%',de:'0.10',sg:'22%',pm:'14%',pe:'35x'},
+ ],
+ mktshare:[{l:'Training Simulators',p:55,c:'#e8b84b'},{l:'Anti-Drone Systems',p:28,c:'#e07070'},{l:'VR Training',p:10,c:'#52b788'},{l:'Others',p:7,c:'#777'}],
+ orderbook:[{yr:'FY23 OB',v:'₹320 Cr',n:'Order Book'},{yr:'FY24 OB',v:'₹750 Cr',n:'Order Book'},{yr:'FY25 OB',v:'₹1,400+ Cr',n:'Record High'}],
+ moat:['Niche Monopoly India','200+ Patents','IP-Protected Tech','Army/Navy/AF Ties','Anti-Drone Leader'],
+ weak:['Very High Valuation (48x)','Govt Order Concentration','Lumpy Quarterly Revenue','Small Cap Liquidity'],
+ war:'War tensions are DIRECTLY bullish for Zen Tech. India raises defence budget, simulation and anti-drone orders get top priority. Current geopolitical environment is one of the strongest demand signals Zen Tech has seen.',
+ quotes:[
+   {t:'Zen Technologies is positioned at the exact intersection of three mega trends — defence indigenization, simulation training and anti-drone technology. The order book growth confirms the thesis.',a:'ICICI Securities Defence Report, 2025'},
+   {t:'The 200+ patent moat and government relationships make Zen Tech nearly irreplaceable in its niche. At current valuations you need sustained 40%+ growth to justify the price — but the order book suggests it is achievable.',a:'Nuvama Research, Feb 2025'},
+ ]
+},
+];
+
+// ────────────────────────────────────────────────
+// CLOCK
+// ────────────────────────────────────────────────
+setInterval(()=>{
+  document.getElementById('navtime').textContent=
+    new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+},1000);
+
+// ────────────────────────────────────────────────
+// PRICE FETCHING — multiple proxies for reliability
+// ────────────────────────────────────────────────
+const PROXIES=[
+  url=>`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
+];
+
+async function fetchWithFallback(sym){
+  const yahooUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`;
+  for(const makeProxy of PROXIES){
+    try{
+      const r=await fetch(makeProxy(yahooUrl),{signal:AbortSignal.timeout(8000)});
+      let text=await r.text();
+      // allorigins wraps in {contents:...}
+      let data;
+      try{const parsed=JSON.parse(text);data=parsed.contents?JSON.parse(parsed.contents):parsed;}
+      catch{data=JSON.parse(text);}
+      const meta=data.chart.result[0].meta;
+      const price=meta.regularMarketPrice;
+      const prev=meta.chartPreviousClose||meta.previousClose||price;
+      return{price,prev,ok:true};
+    }catch(e){continue;}
+  }
+  return{ok:false};
+}
+
+function fmt(n){return n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtI(n){return Math.round(n).toLocaleString('en-IN');}
+
+async function fetchPrice(s){
+  const res=await fetchWithFallback(s.sym);
+  if(!res.ok){
+    document.getElementById('p-'+s.key).textContent='Retry↻';
+    document.getElementById('c-'+s.key).textContent='Tap Refresh';
+    document.getElementById('c-'+s.key).className='cmp-chg flat';
+    return;
+  }
+  const{price,prev}=res;
+  const chg=price-prev,pct=(chg/prev)*100,sign=chg>=0?'+':'';
+  document.getElementById('p-'+s.key).textContent='₹'+fmt(price);
+  const el=document.getElementById('c-'+s.key);
+  el.textContent=`${sign}₹${Math.abs(chg).toFixed(2)} (${sign}${pct.toFixed(2)}%)`;
+  el.className='cmp-chg '+(chg>0?'up':chg<0?'down':'flat');
+  // update modal if open
+  const mp=document.getElementById('modal-price');
+  if(mp&&document.getElementById('modal-title').textContent===s.name){
+    mp.textContent='₹'+fmt(price);
+    const mc=document.getElementById('modal-chg');
+    mc.textContent=`${sign}₹${Math.abs(chg).toFixed(2)} (${sign}${pct.toFixed(2)}%)`;
+    mc.className='modal-chg '+(chg>0?'up':chg<0?'down':'flat');
+  }
+}
+
+// Fetch indices
+async function fetchIndex(sym,valId,chgId){
+  const res=await fetchWithFallback(sym);
+  if(!res.ok)return;
+  const{price,prev}=res;
+  const chg=price-prev,pct=(chg/prev)*100,sign=chg>=0?'+':'';
+  document.getElementById(valId).textContent=fmtI(price);
+  const el=document.getElementById(chgId);
+  el.textContent=`${sign}${pct.toFixed(2)}%`;
+  el.className='ni-chg '+(chg>0?'up':chg<0?'down':'flat');
+}
+
+async function fetchAll(){
+  document.getElementById('pstatus').textContent='Fetching live prices...';
+  await Promise.all([
+    ...STOCKS.map(s=>fetchPrice(s)),
+    fetchIndex('^NSEI','ni-nifty','nc-nifty'),
+    fetchIndex('^BSESN','ni-sensex','nc-sensex'),
+    fetchIndex('^NSEBANK','ni-banknifty','nc-banknifty'),
+    fetchIndex('GOLD.MCX','ni-gold','nc-gold'),
+    fetchIndex('USDINR=X','ni-usdinr','nc-usdinr'),
+  ]);
+  const t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('pstatus').textContent=`Updated ${t} — prices may be delayed ~15 min during market hours`;
+}
+
+// ────────────────────────────────────────────────
+// RENDER STOCK CARDS
+// ────────────────────────────────────────────────
+function mcol(k,v){
+  if(['ROE','ROCE'].includes(k))return 'g';
+  if(k==='Debt'||k==='D/E'){if(v.toLowerCase().includes('zero')||v.toLowerCase().includes('minimal'))return 'g';
+    if(v.toLowerCase().includes('very')||v.toLowerCase().includes('massive'))return 'b';return 'w';}
+  if(k==='PE'){if(v.toLowerCase().includes('very')||v.toLowerCase().includes('high'))return 'b';
+    const n=parseFloat(v);if(n>50)return 'b';if(n<20)return 'g';return 'w';}
+  return 'n';
+}
+
+function renderCards(){
+  document.getElementById('stocks-grid').innerHTML=STOCKS.map(s=>`
+    <div class="stock-card" onclick="openModal('${s.key}')">
+      <div class="card-top">
+        <div><div class="sname">${s.name}</div><div class="sticker">${s.key} · NSE</div><div class="ssector">${s.sector}</div></div>
+        <div class="cmp-wrap">
+          <div class="cmp-price" id="p-${s.key}">Loading...</div>
+          <div class="cmp-chg flat" id="c-${s.key}">--</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="metrics">
+          ${Object.entries(s.metrics).slice(0,6).map(([k,v])=>`
+            <div class="mb"><div class="ml">${k}</div><div class="mv ${mcol(k,v)}">${v}</div></div>`).join('')}
+        </div>
+        <div class="tap-hint">↗ Tap for charts · peers · expert views</div>
+      </div>
+    </div>`).join('');
+}
+
+// ────────────────────────────────────────────────
+// MODAL
+// ────────────────────────────────────────────────
+let charts=[];
+function destroyCharts(){charts.forEach(c=>{try{c.destroy()}catch(e){}});charts=[];}
+
+function openModal(key){
+  const s=STOCKS.find(x=>x.key===key);
+  destroyCharts();
+  document.getElementById('modal-title').textContent=s.name;
+  document.getElementById('modal-sub').textContent=`${s.key} · NSE · ${s.sector}`;
+  // show current price in modal header
+  const priceEl=document.getElementById('p-'+s.key);
+  document.getElementById('modal-price').textContent=priceEl?priceEl.textContent:'--';
+  const chgEl=document.getElementById('c-'+s.key);
+  const mc=document.getElementById('modal-chg');
+  if(chgEl){mc.textContent=chgEl.textContent;mc.className='modal-chg '+(chgEl.className.includes('up')?'up':chgEl.className.includes('down')?'down':'flat');}
+
+  const TABS=['Overview','Financials','Peers','Segments','Expert Views','Macro Risk'];
+  document.getElementById('modal-tabs').innerHTML=TABS.map((t,i)=>
+    `<button class="mtab${i===0?' active':''}" onclick="switchTab(${i},this)">${t}</button>`).join('');
+  document.getElementById('modal-content').innerHTML=TABS.map((t,i)=>
+    `<div class="tab-panel${i===0?' active':''}" id="tp-${i}">${buildPanel(s,i)}</div>`).join('');
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>drawCharts(s),80);
+}
+
+function switchTab(i,btn){
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tp-'+i).classList.add('active');
+}
+
+function closeModalDirect(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  destroyCharts();
+}
+function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalDirect();}
+
+function buildPanel(s,i){
+  if(i===0)return`
+    <div class="info-box"><h4>What does ${s.name.split(' ')[0]} do?</h4><p>${s.what}</p></div>
+    <div class="info-box"><h4>Key Metrics</h4>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:.4rem">
+        ${Object.entries(s.metrics).map(([k,v])=>`<div class="mb"><div class="ml">${k}</div><div class="mv n">${v}</div></div>`).join('')}
+      </div></div>
+    <div class="info-box"><h4>Moat</h4><div class="tags">${s.moat.map(m=>`<span class="tag moat">${m}</span>`).join('')}</div></div>
+    <div class="info-box"><h4>Weak Points</h4><div class="tags">${s.weak.map(m=>`<span class="tag weak">${m}</span>`).join('')}</div></div>`;
+
+  if(i===1)return`
+    <div class="two-col">
+      <div class="chart-wrap"><div class="chart-title">Revenue (₹ Cr)</div><canvas id="ch-rev"></canvas></div>
+      <div class="chart-wrap"><div class="chart-title">Net Profit / PAT (₹ Cr)</div><canvas id="ch-pat"></canvas></div>
+    </div>
+    <div class="chart-wrap"><div class="chart-title">Capex Spend (₹ Cr)</div><canvas id="ch-cap"></canvas></div>`;
+
+  if(i===2)return`
+    <div style="margin-bottom:.7rem;font-size:.72rem;color:var(--muted)">★ = ${s.name} · 3-Year Peer Comparison</div>
+    <div style="overflow-x:auto">
+    <table class="peer-table">
+      <thead><tr><th>Company</th><th>ROE</th><th>D/E Ratio</th><th>Sales Growth</th><th>PAT Margin</th><th>P/E</th></tr></thead>
+      <tbody>${s.peers.map(p=>`<tr class="${p.hl?'hl':''}">
+        <td>${p.n}${p.hl?' ★':''}</td>
+        <td class="${parseFloat(p.roe)>20?'g':parseFloat(p.roe)<12?'b':'w'}">${p.roe}</td>
+        <td class="${parseFloat(p.de)>2?'b':p.de==='0.00'||p.de==='0.02'?'g':'n'}">${p.de}</td>
+        <td class="${parseInt(p.sg)>30?'g':parseInt(p.sg)<10?'b':'w'}">${p.sg}</td>
+        <td class="${parseInt(p.pm)>25?'g':parseInt(p.pm)<8?'b':'w'}">${p.pm}</td>
+        <td>${p.pe}</td></tr>`).join('')}
+      </tbody></table></div>
+    <div style="margin-top:1.1rem">
+      <div class="chart-title" style="margin-bottom:.6rem">Order Book / Revenue Track</div>
+      <div class="ob-grid">${s.orderbook.map(o=>`<div class="ob-box"><div class="ob-yr">${o.yr}</div><div class="ob-val">${o.v}</div><div class="ob-sub">${o.n}</div></div>`).join('')}</div>
+    </div>`;
+
+  if(i===3)return`
+    <div style="margin-bottom:.7rem;font-size:.72rem;color:var(--muted)">Revenue segment breakdown</div>
+    <div class="chart-wrap">
+      <div class="donut-wrap">
+        <canvas id="ch-donut"></canvas>
+        <div style="flex:1">${s.mktshare.map(m=>`
+          <div class="dl-item"><div class="dl-dot" style="background:${m.c}"></div>
+          <span style="color:#bbb;flex:1">${m.l}</span>
+          <span style="color:var(--gold);font-weight:600">${m.p}%</span></div>`).join('')}
+        </div>
+      </div></div>`;
+
+  if(i===4)return s.quotes.map(q=>`
+    <div class="quote-card">
+      <div class="quote-text">"${q.t}"</div>
+      <div class="quote-attr">— ${q.a}</div>
+    </div>`).join('');
+
+  if(i===5)return`
+    <div class="info-box"><h4>Geopolitical & Macro Risk</h4><div class="war-box"><p>${s.war}</p></div></div>
+    <div class="info-box"><h4>Key Risks to Monitor</h4><div class="tags">${s.weak.map(m=>`<span class="tag risk">${m}</span>`).join('')}</div></div>`;
+  return'';
+}
+
+function drawCharts(s){
+  const muted='#555',grid='rgba(255,255,255,0.04)';
+  const base={responsive:true,maintainAspectRatio:true,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1,titleColor:'#e8b84b',bodyColor:'#bbb'}},
+    scales:{x:{ticks:{color:muted,font:{size:10}},grid:{color:grid}},y:{ticks:{color:muted,font:{size:10}},grid:{color:grid}}}};
+  const mk=(id,type,data,col,fill)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const ds={data,borderColor:col,borderWidth:type==='line'?2:0,borderRadius:type==='bar'?3:0,
+      backgroundColor:type==='bar'?col+'99':col+'22',fill:!!fill,tension:.3,
+      pointRadius:type==='line'?4:0,pointBackgroundColor:col};
+    charts.push(new Chart(el,{type,data:{labels:s.years,datasets:[ds]},options:{...base}}));
+  };
+  mk('ch-rev','bar',s.revenue,'#e8b84b');
+  mk('ch-pat','bar',s.pat,'#52b788');
+  mk('ch-cap','line',s.capex,'#5b9bd5',true);
+  const dc=document.getElementById('ch-donut');
+  if(dc){charts.push(new Chart(dc,{type:'doughnut',
+    data:{labels:s.mktshare.map(m=>m.l),datasets:[{data:s.mktshare.map(m=>m.p),
+      backgroundColor:s.mktshare.map(m=>m.c),borderColor:'#1a1a1a',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:true,cutout:'65%',
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1,titleColor:'#e8b84b',bodyColor:'#bbb'}}}}));}
+}
+
+// ────────────────────────────────────────────────
+// NEWS FEED — via RSS2JSON (free, no key needed)
+// ────────────────────────────────────────────────
+const NEWS_SOURCES={
+  et:{name:'Economic Times',color:'#e8b84b',
+    url:'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms'},
+  bs:{name:'Business Standard',color:'#52b788',
+    url:'https://www.business-standard.com/rss/markets-106.rss'},
+  mc:{name:'MoneyControl',color:'#5b9bd5',
+    url:'https://www.moneycontrol.com/rss/marketreports.xml'},
+  fi:{name:'Financial Express',color:'#e09050',
+    url:'https://www.financialexpress.com/market/feed/'},
+};
+
+let currentSource='all';
+let allNewsItems=[];
+
+function switchSource(src,btn){
+  currentSource=src;
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNewsItems(src);
+}
+
+async function fetchRSS(key,src){
+  const apiUrl=`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(src.url)}&count=15`;
+  try{
+    const r=await fetch(apiUrl,{signal:AbortSignal.timeout(10000)});
+    const d=await r.json();
+    if(d.status!=='ok'||!d.items)return[];
+    return d.items.map(item=>({
+      title:item.title,
+      desc:item.description?item.description.replace(/<[^>]*>/g,'').substring(0,150):'',
+      link:item.link,
+      pubDate:item.pubDate,
+      source:src.name,
+      sourceKey:key,
+      color:src.color,
+    }));
+  }catch(e){return[];}
+}
+
+async function loadNews(src){
+  const btn=document.getElementById('news-refresh-btn');
+  btn.classList.add('loading');
+  document.getElementById('news-container').innerHTML=`<div class="news-loading">Fetching latest news...</div>`;
+
+  try{
+    if(src==='all'||allNewsItems.length===0){
+      // fetch all sources in parallel
+      const results=await Promise.all(Object.entries(NEWS_SOURCES).map(([k,v])=>fetchRSS(k,v)));
+      allNewsItems=results.flat().sort((a,b)=>new Date(b.pubDate)-new Date(a.pubDate));
+    }
+    const t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('news-time').textContent=`Updated ${t}`;
+    renderNewsItems(currentSource);
+  }catch(e){
+    document.getElementById('news-container').innerHTML=`<div class="news-error">Failed to load news. Please try again.</div>`;
+  }
+  btn.classList.remove('loading');
+}
+
+function renderNewsItems(src){
+  const items=src==='all'?allNewsItems:allNewsItems.filter(i=>i.sourceKey===src);
+  if(!items.length){
+    document.getElementById('news-container').innerHTML=`<div class="news-empty">No news loaded yet. Click Refresh News above.</div>`;
+    return;
+  }
+  const show=items.slice(0,24);
+  document.getElementById('news-container').innerHTML=`<div class="news-grid">${
+    show.map(item=>`
+      <a class="news-card" href="${item.link}" target="_blank" rel="noopener">
+        <div class="nc-source">
+          <div class="nc-dot" style="background:${item.color}"></div>
+          ${item.source}
+        </div>
+        <div class="nc-title">${item.title}</div>
+        ${item.desc?`<div class="nc-desc">${item.desc}</div>`:''}
+        <div class="nc-time">${timeAgo(item.pubDate)}</div>
+      </a>`).join('')
+  }</div>`;
+}
+
+function timeAgo(dateStr){
+  try{
+    const diff=(Date.now()-new Date(dateStr).getTime())/1000;
+    if(diff<60)return 'Just now';
+    if(diff<3600)return Math.floor(diff/60)+'m ago';
+    if(diff<86400)return Math.floor(diff/3600)+'h ago';
+    return Math.floor(diff/86400)+'d ago';
+  }catch(e){return dateStr||'';}
+}
+
+// ────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────
+renderCards();
+fetchAll();
+// auto-refresh prices every 3 minutes
+setInterval(fetchAll, 3*60*1000);
+</script>
+</body>
+</html>
